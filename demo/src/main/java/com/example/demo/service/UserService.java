@@ -1,32 +1,42 @@
 package com.example.demo.service;
 
-@Service
-public class UserService {
+import com.example.demo.model.User;
+import com.example.demo.repository.UserRepository;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 
+import java.util.List;
+
+@Service
+public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
-
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        String cleanedUsername = username != null ? username.trim() : null;
 
-    public User createUser(User user) {
-        return userRepository.save(user);
-    }
+        User user = userRepository.findByUsername(cleanedUsername);
 
-
-    public User login(String email, String password) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-
-        if (!user.getPassword().equals(password)) {
-            throw new RuntimeException("Wrong password");
+        if (user == null) {
+            throw new UsernameNotFoundException("Kullanıcı bulunamadı: '" + cleanedUsername + "'");
         }
 
-
+        System.out.println("Giriş yapan kullanıcı bulundu: " + user.getUsername());
         return user;
+    }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username.trim());
     }
 }
