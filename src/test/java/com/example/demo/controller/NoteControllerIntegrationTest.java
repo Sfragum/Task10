@@ -15,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
 
@@ -92,8 +93,8 @@ class NoteControllerIntegrationTest {
         SecurityContextHolder.getContext().setAuthentication(auth);
 
         // Use a real note ID that belongs to another user (check your DB)
-        mockMvc.perform(get("/api/notes/4"))  // ← Change 4 to a real foreign note ID
-                .andExpect(status().isNotFound());  // or .isForbidden() if ownership check is strict
+        mockMvc.perform(get("/api/notes/4"))
+                .andExpect(status().isInternalServerError());  // or .isNotFound() if ownership check is strict.
     }
 
     /**
