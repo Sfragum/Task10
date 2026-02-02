@@ -1,4 +1,4 @@
-name: Lab 14 - Build & Tests
+name: Lab 14 - Build, Test & Coverage
 
 on:
   push:
@@ -11,15 +11,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Repo'yu çek
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # 2. JDK 21 kur
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
 
+      # 3. Maven cache (hız için)
       - name: Cache Maven packages
         uses: actions/cache@v4
         with:
@@ -27,11 +30,17 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
+      # 4. Build + tüm testleri çalıştır
       - name: Build and run all tests
         run: mvn -B clean verify
 
+      # 5. JaCoCo coverage raporu üret
+      - name: Generate JaCoCo coverage report
+        run: mvn -B jacoco:report
+
+      # 6. Coverage raporunu sakla (artifact olarak)
       - name: Upload JaCoCo coverage report
-        if: always()
+        if: always()  # hata olsa bile raporu sakla
         uses: actions/upload-artifact@v4
         with:
           name: jacoco-coverage-report
